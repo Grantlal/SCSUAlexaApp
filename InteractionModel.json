@@ -1,0 +1,61 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "scsu",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": [
+                        "help"
+                    ]
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "GetCourseGrade",
+                    "slots": [],
+                    "samples": [
+                        "what is my grade",
+                        "what are my grades",
+                        "get my grades"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": [
+                        "nope",
+                        "no"
+                    ]
+                },
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": [
+                        "yeah",
+                        "yes"
+                    ]
+                },
+                {
+                    "name": "GetMovies",
+                    "slots": [],
+                    "samples": [
+                        "Get me movies",
+                        "Movies",
+                        "What movies are in atwood",
+                        "What movies are playing"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}
