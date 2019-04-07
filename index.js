@@ -1,29 +1,39 @@
-// Developers: Grant LaLonde
-// Add your names here if you worked on it:
-// This is a proof of concept in order to assist students on 
-// campus with a multitude of different problems. 
-// Some of these include: Grades, Movies, and Food. 
+// This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
+// Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
+// session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
 
-const SKILL_NAME = 'Course Grades';
-const GET_GRADE_MESSAGE = "Your grade is: ";
-const HELP_MESSAGE = 'You can ask what is grade or, you can say exit... What can I help you with?';
+const SKILL_NAME = 'SCSU Application';
+const HELP_MESSAGE = 'You can ask what is my grade or, you can say exit... What can I help you with?';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'See ya!';
 const MORE_MESSAGE = 'Is there anything else I can help with?';
-const INTRO_MESSAGE = 'Welcome to the Saint Cloud Alexa Application';
+const INTRO_MESSAGE = 'Welcome to the Saint Cloud State Alexa Application';
 
+
+//Course grades for Construction
+const Construction_Grade = [
+    'C+',
+    ];
+    
+//Course grade for quality
+const Quality_Grades = [
+    'B-',
+    'A-',
+    'B+',
+    'C-',
+    ];
 
 //Course grade Data
 const OS_Grades = [
-    'A ',
-    'B ',
-];
+    'D',
+    'B',
+    ];
 
 //Movies list
 const Movie_List = [
-    'Avengers: Endgame',
-    'Detective Pikachu',
+    'Toy Story',
+    'Will Smith',
     'Mean Girls', 
     ];
 
@@ -32,7 +42,6 @@ const LaunchRequestHandler = {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speechText = getGrade();
         return handlerInput.responseBuilder
             .speak(INTRO_MESSAGE)
             .getResponse();
@@ -45,7 +54,13 @@ const getGradeHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'GetCourseGrade';
     },
     handle(handlerInput) {
-        const speechText = getGrade();
+        const itemSlot = handlerInput.requestEnvelope.request.intent.slots.class;
+        let itemName;
+        if (itemSlot && itemSlot.value) {
+            itemName = itemSlot.value.toLowerCase();
+        }
+        const speechText = getGrade(itemName);
+        
         return handlerInput.responseBuilder
             .speak(speechText.speach)
             .reprompt(speechText.reprompt)
@@ -171,10 +186,24 @@ const ErrorHandler = {
 };
 
 //Function to find grades in grade list.
-function getGrade() {
-    const initial_phrase = "In operating systems you currently have a ";
-    const grades = OS_Grades;
-    const grade_received = grades[1];
+function getGrade(classtype) {
+    //var classtype = this.event.request.intent.slots.class.value;
+    let initial_phrase = "In " + classtype + " you have a ";
+    var grades = Construction_Grade;
+    if (classtype === 'operating systems' || classtype === 'systems' || classtype === 'os') {
+        grades = OS_Grades; 
+    }
+    else if (classtype === 'quality' || classtype === 'software quality') {
+        grades = Quality_Grades;
+    }
+    else if (classtype === 'construction' || classtype === 'software construction'){
+        grades = Construction_Grade; 
+    }
+    else {
+        initial_phrase = "I'm sorry, I couldn't find the course: " + classtype;
+        grades = ' ';
+    }
+    const grade_received = grades[0];
     const speachOutput = initial_phrase + grade_received;
     const more = MORE_MESSAGE;
     return {speach: speachOutput, reprompt: more};
