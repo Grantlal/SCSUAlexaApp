@@ -1,6 +1,9 @@
-// This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
-// Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
-// session persistence, api calls, and more.
+// Developers: Grant LaLonde
+// Add your names here if you worked on it: 
+// This is a proof of concept in order to assist students on 
+// campus with a multitude of different problems. 
+// Some of these include: Grades, Movies, and Food. 
+
 const Alexa = require('ask-sdk-core');
 
 const SKILL_NAME = 'SCSU Application';
@@ -9,14 +12,19 @@ const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'See ya!';
 const MORE_MESSAGE = 'Is there anything else I can help with?';
 const INTRO_MESSAGE = 'Welcome to the Saint Cloud State Alexa Application';
+const amount_of_grades = 5;
 
+// Grades achieved in Construction
+const construction_grades = [100, 80, 64, 40, 600];
+const qa_grades = [100, 90, 90, 75, 600];
+const systems_grades = [50, 50, 60, 63, 600];
 
-//Course grades for Construction
+// Overall grade for Construction
 const Construction_Grade = [
     'C+',
     ];
     
-//Course grade for quality
+// Course grade for quality
 const Quality_Grades = [
     'B-',
     'A-',
@@ -24,19 +32,21 @@ const Quality_Grades = [
     'C-',
     ];
 
-//Course grade Data
+// Course grade Data
 const OS_Grades = [
     'D',
     'B',
     ];
 
-//Movies list
+// Movies list
 const Movie_List = [
     'Toy Story',
-    'Will Smith',
+    'Will Smith on Ice',
     'Mean Girls', 
     ];
 
+
+//This is the intro handler. Basically if the command open scsu is used this will occur. 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -48,6 +58,9 @@ const LaunchRequestHandler = {
     }
 };
 
+// This is the handler that will call the getgrade funcion to receive grades
+// Pres: requires a class name, otherwise it will default to an error message. 
+// Post: Outputs whatever grade requester has. 
 const getGradeHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -68,6 +81,9 @@ const getGradeHandler = {
     }
 };
 
+// A More simple intent handler. This one just calls getMovies function, 
+// It doesn't require any specific slots, and will return a static list of 
+// movies. 
 const getMovieHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -82,6 +98,28 @@ const getMovieHandler = {
     }
 };
 
+// The calulate passing intent handler. 
+// Pre: Called, and has a proper slot type
+// Post: Outputs requirements for class slot to pass 
+const calculatePassingHandler = {
+        canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'CalculatePassing';
+    },
+    handle(handlerInput) {
+        const itemSlot = handlerInput.requestEnvelope.request.intent.slots.class;
+        let itemName;
+        if (itemSlot && itemSlot.value) {
+            itemName = itemSlot.value.toLowerCase();
+        }
+        const speechText = calculatePass(itemName);
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
+    
+}
 
 const HelpIntentHandler = {
     canHandle(handlerInput) {
@@ -111,6 +149,7 @@ const CancelAndStopIntentHandler = {
     }
 };
 
+//Intent handler to say yes to request
 const YesIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -125,6 +164,7 @@ const YesIntentHandler = {
     }
 };
 
+//Intent to handle no to a request
 const NoIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -138,6 +178,7 @@ const NoIntentHandler = {
     }
 };
 
+//Intent handler to end current session.
 const SessionEndedRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'SessionEndedRequest';
@@ -209,7 +250,7 @@ function getGrade(classtype) {
     return {speach: speachOutput, reprompt: more};
 }
 
-//Fuction to find movies playing
+//Function to find movies playing
 function getMovies() {
     const movieNames = Movie_List;
     const ListofMovies = movieNames[0] + ", " + movieNames[1] + ", and " + movieNames[2];
@@ -217,6 +258,56 @@ function getMovies() {
     const more = MORE_MESSAGE;
     const SpeachOutput = openPhrase + ListofMovies;
     return {speach: SpeachOutput, reprompt: more};
+}
+
+//Function to calculate what is necessary to pass a classtype
+function calculatePass (className) {
+    let initial_phrase = "You currently have ";
+    let total_achieved = 0;
+    let achieved_grades, necessary_pointsA, necessary_pointsB, necessary_pointsC,
+    getC, getB, getA, total_points;
+    
+    //Catch class names, assign variables as required. 
+    if(className === 'construction' || className === 'software construction') {
+        achieved_grades = construction_grades;
+    }
+    else if (className === 'quality' || className === 'software quality') {
+        achieved_grades = qa_grades; 
+    }
+    else if (className === 'operating systems' || className === 'systems' || className === 'os') {
+        achieved_grades = systems_grades;
+    }
+    else {
+        initial_phrase = "I'm sorry, I couldn't find the course: ";
+        return {speach: initial_phrase, reprompt: MORE_MESSAGE};
+    }
+    
+    //Loop to calculate total score of grades
+    for (let i = 0; i < amount_of_grades - 1; i++) {
+        total_achieved += achieved_grades[i];
+    }
+    
+    initial_phrase += total_achieved + " total points in " + className;
+    
+    //Start fun calculations
+    //Assign the amount of total points in the class
+    total_points = achieved_grades[4];
+    
+    //Assign the total necessary points for an A, B, or C
+    necessary_pointsA = total_points * .9;
+    necessary_pointsB = total_points * .8;
+    necessary_pointsC = total_points * .7;
+    
+    //Assign the amount of points needed to pass for each grade
+    getA = necessary_pointsA - total_achieved;
+    getB = necessary_pointsB - total_achieved;
+    getC = necessary_pointsC - total_achieved;
+    
+    //Finally create the new phrases
+    initial_phrase += "... to get an A you need " + getA + " more points, ";
+    initial_phrase += "to get a B you need " + getB + " more points, ";
+    initial_phrase += "and to get a C you need " + getC + " more points";
+    return {speach: initial_phrase, reprompt: MORE_MESSAGE};
 }
 
 // This handler acts as the entry point for your skill, routing all request and response
@@ -227,6 +318,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         LaunchRequestHandler,
         getGradeHandler,
         getMovieHandler,
+        calculatePassingHandler,
         YesIntentHandler, 
         NoIntentHandler,
         HelpIntentHandler,
@@ -236,3 +328,4 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addErrorHandlers(
         ErrorHandler)
     .lambda();
+    

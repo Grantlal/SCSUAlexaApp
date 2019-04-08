@@ -23,8 +23,18 @@
                 },
                 {
                     "name": "GetCourseGrade",
-                    "slots": [],
+                    "slots": [
+                        {
+                            "name": "class",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        }
+                    ],
                     "samples": [
+                        "{class} grade",
+                        "grade",
+                        "for {class} what is my grade",
+                        "what is my grade in {class}",
+                        "get my grade for {class}",
                         "what is my grade",
                         "what are my grades",
                         "get my grades"
@@ -53,9 +63,48 @@
                         "What movies are in atwood",
                         "What movies are playing"
                     ]
+                },
+                {
+                    "name": "CalculatePassing",
+                    "slots": [
+                        {
+                            "name": "class",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        }
+                    ],
+                    "samples": [
+                        "pass {class}",
+                        "passing conditions for {class}",
+                        "can i pass {class}",
+                        "how can i pass {class}",
+                        "What do I need to pass {class}"
+                    ]
                 }
             ],
-            "types": []
+            "types": [
+                {
+                    "name": "AMAZON.US_FIRST_NAME",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "construction",
+                                "synonyms": [
+                                    "software construction"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "operating systems",
+                                "synonyms": [
+                                    "os",
+                                    "systems"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     }
 }
