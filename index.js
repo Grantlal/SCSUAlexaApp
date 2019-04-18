@@ -13,11 +13,27 @@ const STOP_MESSAGE = 'See ya!';
 const MORE_MESSAGE = 'Is there anything else I can help with?';
 const INTRO_MESSAGE = 'Welcome to the Saint Cloud State Alexa Application';
 const amount_of_grades = 5;
+const dynamoDBTableName = "SchoolData";
 
+
+// Data sets used for debugging when dynamo server was acting up
 // Grades achieved in Construction
 const construction_grades = [100, 80, 64, 40, 600];
 const qa_grades = [100, 90, 90, 75, 600];
 const systems_grades = [50, 50, 60, 63, 600];
+
+// Events
+
+const EventList = [
+    'German Cultural Night, April 20th',
+    'Design your future workshop, April 22th',
+    ];
+    
+const restaraunts = [
+    'Chik-fil-a',
+    'The Den', 
+    'Erberts and Gerberts'
+    ];
 
 // Overall grade for Construction
 const Construction_Grade = [
@@ -119,6 +135,59 @@ const calculatePassingHandler = {
             .getResponse();
     }
     
+}
+
+const getEventHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'GetEvents';
+    },
+    handle(handlerInput) {
+        const speechText = getEvents();
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
+};
+
+
+const getFoodHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'GetFood';
+    },
+    handle(handlerInput) {
+        const speechText = getFood();
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
+};
+
+const orderFoodHandler = {
+        canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'Order';
+    },
+    handle(handlerInput) {
+        const restarauntSlot = handlerInput.requestEnvelope.request.intent.slots.restaraunt;
+        const foodSlot = handlerInput.requestEnvelope.request.intent.slots.food;
+        let restaurant, foodItem;
+        if (restarauntSlot && restarauntSlot.value) {
+            restaurant = restarauntSlot.value.toLowerCase();
+        }
+        
+        if (foodSlot && foodSlot.value) {
+            foodItem = foodSlot.value.toLowerCase();
+        }
+        const speechText = calculateOrderTotal(restaurant, foodItem);
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
 }
 
 const HelpIntentHandler = {
@@ -305,9 +374,60 @@ function calculatePass (className) {
     
     //Finally create the new phrases
     initial_phrase += "... to get an A you need " + getA + " more points, ";
-    initial_phrase += "to get a B you need " + getB + " more points, ";
-    initial_phrase += "and to get a C you need " + getC + " more points";
+    initial_phrase += "to get a B you need " + getB + " more, ";
+    initial_phrase += "and to get a C you need " + getC + " more";
     return {speach: initial_phrase, reprompt: MORE_MESSAGE};
+}
+
+//Function that returns events happening on campus. 
+function getEvents() {
+    const Events = EventList;
+    const ListofEvents = Events[0] + " and " + Events[1];
+    const openPhrase = "Some events happening soon are: ";
+    const more = MORE_MESSAGE;
+    const SpeachOutput = openPhrase + ListofEvents;
+    return {speach: SpeachOutput, reprompt: more};
+    
+}
+
+//Function to find food on campus
+function getFood() {
+    const Foods = restaraunts;
+    const ListOfRestaraunts = Foods[0] + ", " + Foods[1] + ", and " + Foods[2];
+    const openPhrase = "Some restaraunts on campus are: ";
+    const more = MORE_MESSAGE;
+    const SpeachOutput = openPhrase + ListOfRestaraunts;
+    return {speach: SpeachOutput, reprompt: more};
+    
+}
+
+//Function to calculate what an order total is at a restaraunt. 
+function calculateOrderTotal(restaurant, foodItem) {
+    let total = 0;
+    let multiplier = 1;
+    let initial_phrase = "Your total for " + foodItem + " will be: ";
+    if (restaurant === 'chikfila') {
+        multiplier = 1.2;
+    }
+    if (restaurant === 'erberts') {
+        multiplier = 1.5;
+    }
+    if(foodItem === 'number1' || foodItem === 'number2' || foodItem === 'chicken') {
+        total += 7;
+    }
+    else if (foodItem === 'nuggets' || foodItem === 'deluxe' || foodItem === 'special')
+    {
+        total+= 10;
+    }
+    else
+    {
+        total += 12;
+    } 
+    total *= multiplier;
+    let minutes = Math.floor(Math.random() * total);
+    initial_phrase += total + " dollars, and will be ready for pickup at " + restaurant + " in " + minutes + " minutes";
+    const SpeachOutput = initial_phrase;
+    return {speach: SpeachOutput, reprompt: MORE_MESSAGE};
 }
 
 // This handler acts as the entry point for your skill, routing all request and response
@@ -319,6 +439,9 @@ exports.handler = Alexa.SkillBuilders.custom()
         getGradeHandler,
         getMovieHandler,
         calculatePassingHandler,
+        getFoodHandler,
+        orderFoodHandler,
+        getEventHandler,
         YesIntentHandler, 
         NoIntentHandler,
         HelpIntentHandler,
@@ -328,4 +451,3 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addErrorHandlers(
         ErrorHandler)
     .lambda();
-    

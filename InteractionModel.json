@@ -79,6 +79,46 @@
                         "how can i pass {class}",
                         "What do I need to pass {class}"
                     ]
+                },
+                {
+                    "name": "GetEvents",
+                    "slots": [],
+                    "samples": [
+                        "events happening soon",
+                        "campus events ",
+                        "what events are happening on campus",
+                        "events",
+                        "Are there any events happening"
+                    ]
+                },
+                {
+                    "name": "GetFood",
+                    "slots": [],
+                    "samples": [
+                        "I'm hungry",
+                        "dining options",
+                        "food options",
+                        "what dining options are on campus",
+                        "food"
+                    ]
+                },
+                {
+                    "name": "Order",
+                    "slots": [
+                        {
+                            "name": "restaraunt",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        },
+                        {
+                            "name": "food",
+                            "type": "AMAZON.US_FIRST_NAME"
+                        }
+                    ],
+                    "samples": [
+                        "i want {food} from {restaraunt} ",
+                        "order {food} from {restaraunt}",
+                        "order {restaraunt}"
+                    ]
                 }
             ],
             "types": [
