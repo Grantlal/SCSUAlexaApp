@@ -119,6 +119,27 @@
                         "order {food} from {restaraunt}",
                         "order {restaraunt}"
                     ]
+                },
+                {
+                    "name": "Atwood",
+                    "slots": [],
+                    "samples": [
+                        "fun",
+                        "What can I do for fun",
+                        "campus activities",
+                        "what's happening around campus",
+                        "What's in atwood"
+                    ]
+                },
+                {
+                    "name": "GetCourses",
+                    "slots": [],
+                    "samples": [
+                        "What courses am I taking",
+                        "What courses am I in",
+                        "Classes I am In",
+                        "what classes am I taking"
+                    ]
                 }
             ],
             "types": [

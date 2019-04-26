@@ -14,6 +14,7 @@ const MORE_MESSAGE = 'Is there anything else I can help with?';
 const INTRO_MESSAGE = 'Welcome to the Saint Cloud State Alexa Application';
 const amount_of_grades = 5;
 const dynamoDBTableName = "SchoolData";
+let dbhelper = "dbhelper.js";
 
 
 // Data sets used for debugging when dynamo server was acting up
@@ -22,11 +23,18 @@ const construction_grades = [100, 80, 64, 40, 600];
 const qa_grades = [100, 90, 90, 75, 600];
 const systems_grades = [50, 50, 60, 63, 600];
 
-// Events
+//Attractions at atwood
+const atwoodList = [
+    "restaurants",
+    "events",
+    "movies"
+    ];
 
+
+// Events
 const EventList = [
-    'German Cultural Night, April 20th',
-    'Design your future workshop, April 22th',
+    'Spring 2019 Commencement, May 10th',
+    'Spring Leadership Institute, May 17th',
     ];
     
 const restaraunts = [
@@ -37,7 +45,7 @@ const restaraunts = [
 
 // Overall grade for Construction
 const Construction_Grade = [
-    'C+',
+    'A+',
     ];
     
 // Course grade for quality
@@ -151,6 +159,33 @@ const getEventHandler = {
     }
 };
 
+const atwoodHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'Atwood';
+    },
+    handle(handlerInput) {
+        const speechText = getAtwood();
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
+};
+
+const getCoursesHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'GetCourses';
+    },
+    handle(handlerInput) {
+        const speechText = getCourses();
+        return handlerInput.responseBuilder
+            .speak(speechText.speach)
+            .reprompt(speechText.reprompt)
+            .getResponse();
+    }
+};
 
 const getFoodHandler = {
     canHandle(handlerInput) {
@@ -298,12 +333,13 @@ const ErrorHandler = {
 //Function to find grades in grade list.
 function getGrade(classtype) {
     //var classtype = this.event.request.intent.slots.class.value;
+    let grades = dbhelper.get('grade');
     let initial_phrase = "In " + classtype + " you have a ";
-    var grades = Construction_Grade;
+    grades = Construction_Grade;
     if (classtype === 'operating systems' || classtype === 'systems' || classtype === 'os') {
         grades = OS_Grades; 
     }
-    else if (classtype === 'quality' || classtype === 'software quality') {
+    else if (classtype === 'quality' || classtype === 'software quality' || classtype === 'quality assurance') {
         grades = Quality_Grades;
     }
     else if (classtype === 'construction' || classtype === 'software construction'){
@@ -321,7 +357,8 @@ function getGrade(classtype) {
 
 //Function to find movies playing
 function getMovies() {
-    const movieNames = Movie_List;
+    let movieNames = dbhelper.get('movies');
+    movieNames = Movie_List;
     const ListofMovies = movieNames[0] + ", " + movieNames[1] + ", and " + movieNames[2];
     const openPhrase = "Some of the movies playing right now are: ";
     const more = MORE_MESSAGE;
@@ -379,29 +416,42 @@ function calculatePass (className) {
     return {speach: initial_phrase, reprompt: MORE_MESSAGE};
 }
 
-//Function that returns events happening on campus. 
+//Get the events on campus. Return them
 function getEvents() {
-    const Events = EventList;
-    const ListofEvents = Events[0] + " and " + Events[1];
-    const openPhrase = "Some events happening soon are: ";
+    let Events = dbhelper.get('Events');
+    Events = EventList;
+    const ListofEvents = Events[0] + ", and " + Events[1];
+    const openPhrase = "Some on campus events happening soon are: ";
     const more = MORE_MESSAGE;
     const SpeachOutput = openPhrase + ListofEvents;
     return {speach: SpeachOutput, reprompt: more};
     
 }
 
-//Function to find food on campus
+//Get atwood activities, return them
+function getAtwood() {
+    let activities = dbhelper.get('Atwood');
+    activities = atwoodList;
+    const activitiesList = activities[0] + ", " + activities[1] + ", and " + activities[2];
+    const opening = "Some fun things in atwood are ";
+    const more = MORE_MESSAGE;
+    const SpeachOutput = opening + activitiesList;
+    return {speach: SpeachOutput, reprompt: more};
+}
+
+//Get the food options on campus, return them
 function getFood() {
-    const Foods = restaraunts;
+    let Foods = dbhelper.get('Food');
+    Foods = restaraunts;
     const ListOfRestaraunts = Foods[0] + ", " + Foods[1] + ", and " + Foods[2];
-    const openPhrase = "Some restaraunts on campus are: ";
+    const openPhrase = "Some restaurants on campus are: ";
     const more = MORE_MESSAGE;
     const SpeachOutput = openPhrase + ListOfRestaraunts;
     return {speach: SpeachOutput, reprompt: more};
     
 }
 
-//Function to calculate what an order total is at a restaraunt. 
+//Calculate the total amount for ordering food, It's a weird algorithm honestly. 
 function calculateOrderTotal(restaurant, foodItem) {
     let total = 0;
     let multiplier = 1;
@@ -430,6 +480,16 @@ function calculateOrderTotal(restaurant, foodItem) {
     return {speach: SpeachOutput, reprompt: MORE_MESSAGE};
 }
 
+//Get Courses, return what courses currently taking
+function getCourses() {
+    let coursesList = dbhelper;
+    const openPhrase = "The courses you are taking currently are: Quality Assurance, Software Construction, and Operating Systems";
+    const more = MORE_MESSAGE;
+    const SpeachOutput = openPhrase;
+    return {speach: SpeachOutput, reprompt: more}; 
+}
+
+
 // This handler acts as the entry point for your skill, routing all request and response
 // payloads to the handlers above. Make sure any new handlers or interceptors you've
 // defined are included below. The order matters - they're processed top to bottom.
@@ -441,6 +501,8 @@ exports.handler = Alexa.SkillBuilders.custom()
         calculatePassingHandler,
         getFoodHandler,
         orderFoodHandler,
+        atwoodHandler,
+        getCoursesHandler,
         getEventHandler,
         YesIntentHandler, 
         NoIntentHandler,
